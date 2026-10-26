@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
@@ -35,7 +35,7 @@
     </insert>
 
     <update id="updatePost">
-        UPDATE posts SET title = #{title}, content = #{content}, updated_at = CURRENT_TIMESTAMP WHERE id = #{id}
+        UPDATE posts SET title = #{title}, content = #{content}, updated_at = NOW() WHERE id = #{id}
     </update>
 
     <delete id="deletePost">

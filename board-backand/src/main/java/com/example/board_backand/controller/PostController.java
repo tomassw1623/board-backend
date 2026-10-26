@@ -3,10 +3,7 @@ package com.example.board_backand.controller;
 import com.example.board_backand.dto.Post;
 import com.example.board_backand.service.PostService;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
 @RestController
@@ -41,12 +38,12 @@ public class PostController {
     // 글 수정 (Update)
     @PutMapping("/{id}")
     public void updatePost(@PathVariable Long id, @RequestBody Post post) {
-        postService.updatePost(id, post);
+    postService.updatePost(id, post);
     }
 
     // 글 삭제 (Delete)
     @DeleteMapping("/{id}")
     public void deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    postService.deletePost(id);
     }
 }
