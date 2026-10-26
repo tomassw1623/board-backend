@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board_backand.mapper.PostMapper">
+
+    <select id="findAll" resultType="com.example.board_backand.dto.Post">
+        SELECT 
+            id, 
+            title, 
+            content, 
+            author, 
+            views, 
+            created_at AS createdAt, 
+            updated_at AS updatedAt 
+        FROM posts 
+        ORDER BY id DESC
+    </select>
+
+    <select id="findById" resultType="com.example.board_backand.dto.Post">
+        SELECT 
+            id, 
+            title, 
+            content, 
+            author, 
+            views, 
+            created_at AS createdAt, 
+            updated_at AS updatedAt 
+        FROM posts 
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertPost" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO posts (title, content, author, created_at) VALUES (#{title}, #{content}, #{author}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <update id="updatePost">
+        UPDATE posts SET title = #{title}, content = #{content}, updated_at = CURRENT_TIMESTAMP WHERE id = #{id}
+    </update>
+
+    <delete id="deletePost">
+        DELETE FROM posts WHERE id = #{id}
+    </delete>
+
+</mapper>
