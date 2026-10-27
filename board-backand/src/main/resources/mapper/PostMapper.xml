@@ -13,8 +13,23 @@
             views, 
             created_at AS createdAt, 
             updated_at AS updatedAt 
-        FROM posts 
+        FROM posts
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
         ORDER BY id DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <select id="countPosts" resultType="int">
+        SELECT COUNT(*) FROM posts
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
     </select>
 
     <select id="findById" resultType="com.example.board_backand.dto.Post">

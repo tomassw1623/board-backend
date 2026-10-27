@@ -3,8 +3,11 @@ package com.example.board_backand.controller;
 import com.example.board_backand.dto.Post;
 import com.example.board_backand.service.PostService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -17,31 +20,39 @@ public class PostController {
         this.postService = postService;
     }
 
-    // 전체 목록 조회 (Read)
     @GetMapping
-    public List<Post> getAllPosts() {
-        return postService.getAllPosts();
+    public Map<String, Object> getPosts(
+            @RequestParam(required = false, defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        
+        int offset = (page - 1) * size;
+        List<Post> posts = postService.getPosts(keyword, size, offset);
+        int totalPages = postService.getTotalPages(keyword, size);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("posts", posts);
+        response.put("totalPages", totalPages);
+        response.put("currentPage", page);
+
+        return response;
     }
 
-    // 상세 조회 (Read)
     @GetMapping("/{id}")
     public Post getPostById(@PathVariable Long id) {
         return postService.getPostById(id);
     }
 
-    // 글 작성 (Create)
     @PostMapping
     public void createPost(@RequestBody Post post) {
         postService.createPost(post);
     }
 
-    // 글 수정 (Update)
     @PutMapping("/{id}")
     public void updatePost(@PathVariable Long id, @RequestBody Post post) {
     postService.updatePost(id, post);
     }
 
-    // 글 삭제 (Delete)
     @DeleteMapping("/{id}")
     public void deletePost(@PathVariable Long id) {
     postService.deletePost(id);
