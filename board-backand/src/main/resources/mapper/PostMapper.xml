@@ -5,14 +5,15 @@
 <mapper namespace="com.example.board_backand.mapper.PostMapper">
 
     <select id="findAll" resultType="com.example.board_backand.dto.Post">
-        SELECT 
-            id, 
-            title, 
-            content, 
-            author, 
-            views, 
-            created_at AS createdAt, 
-            updated_at AS updatedAt 
+        SELECT
+            id,
+            member_id AS memberId,
+            title,
+            content,
+            author,
+            views,
+            created_at AS createdAt,
+            updated_at AS updatedAt
         FROM posts
         <where>
             <if test="keyword != null and keyword != ''">
@@ -33,20 +34,22 @@
     </select>
 
     <select id="findById" resultType="com.example.board_backand.dto.Post">
-        SELECT 
-            id, 
-            title, 
-            content, 
-            author, 
-            views, 
-            created_at AS createdAt, 
-            updated_at AS updatedAt 
-        FROM posts 
+        SELECT
+            id,
+            member_id AS memberId,
+            title,
+            content,
+            author,
+            views,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM posts
         WHERE id = #{id}
     </select>
 
     <insert id="insertPost" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO posts (title, content, author, created_at) VALUES (#{title}, #{content}, #{author}, CURRENT_TIMESTAMP)
+        INSERT INTO posts (member_id, title, content, author, created_at)
+        VALUES (#{memberId}, #{title}, #{content}, #{author}, CURRENT_TIMESTAMP)
     </insert>
 
     <update id="updatePost">
@@ -58,7 +61,7 @@
     </delete>
 
     <update id="increaseViews">
-    UPDATE posts SET views = views + 1 WHERE id = #{id}
+        UPDATE posts SET views = views + 1 WHERE id = #{id}
     </update>
 
 </mapper>

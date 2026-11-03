@@ -4,21 +4,25 @@
 
 <mapper namespace="com.example.board_backand.mapper.CommentMapper">
 
-    <!-- 특정 게시글의 댓글 목록 조회 -->
     <select id="findByPostId" resultType="com.example.board_backand.dto.Comment">
-        SELECT id, post_id AS postId, content, author, created_at AS createdAt
+        SELECT id, post_id AS postId, member_id AS memberId, content, author, created_at AS createdAt
         FROM comments
         WHERE post_id = #{postId}
         ORDER BY id DESC
     </select>
 
-    <!-- 댓글 작성 -->
+    <!-- ★ 추가: 삭제 전 작성자 확인용 -->
+    <select id="findById" resultType="com.example.board_backand.dto.Comment">
+        SELECT id, post_id AS postId, member_id AS memberId, content, author, created_at AS createdAt
+        FROM comments
+        WHERE id = #{id}
+    </select>
+
     <insert id="insert" parameterType="com.example.board_backand.dto.Comment">
-        INSERT INTO comments (post_id, content, author)
-        VALUES (#{postId}, #{content}, #{author})
+        INSERT INTO comments (post_id, member_id, content, author)
+        VALUES (#{postId}, #{memberId}, #{content}, #{author})
     </insert>
 
-    <!-- 댓글 삭제 -->
     <delete id="delete" parameterType="Long">
         DELETE FROM comments WHERE id = #{id}
     </delete>

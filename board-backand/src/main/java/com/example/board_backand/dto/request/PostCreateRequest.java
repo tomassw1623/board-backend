@@ -10,9 +10,5 @@ public record PostCreateRequest(
 
         @NotBlank(message = "내용을 입력해주세요.")
         @Size(max = 10000, message = "내용은 10,000자 이하여야 합니다.")
-        String content,
-
-        @NotBlank(message = "작성자를 입력해주세요.")
-        @Size(max = 100, message = "작성자는 100자 이하여야 합니다.")
-        String author
+        String content
 ) {}

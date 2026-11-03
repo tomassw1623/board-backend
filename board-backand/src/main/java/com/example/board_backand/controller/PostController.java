@@ -1,69 +1,73 @@
 package com.example.board_backand.controller;
 
-import com.example.board_backand.dto.request.PostCreateRequest;       // ★
-import com.example.board_backand.dto.request.PostUpdateRequest;       // ★
-import com.example.board_backand.dto.response.PostListResponse;       // ★
-import com.example.board_backand.dto.response.PostResponse;           // ★
+import com.example.board_backand.config.AuthSupport;
+import com.example.board_backand.dto.Member;
+import com.example.board_backand.dto.request.PostCreateRequest;
+import com.example.board_backand.dto.request.PostUpdateRequest;
+import com.example.board_backand.dto.response.PostListResponse;
+import com.example.board_backand.dto.response.PostResponse;
+import com.example.board_backand.service.MemberService;
 import com.example.board_backand.service.PostService;
-import jakarta.validation.Valid;                                      // ★
-import org.springframework.http.HttpStatus;                           // ★
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-// ★ java.util.HashMap, java.util.Map import 는 삭제
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "http://localhost:5173") // React 개발 서버 연동용
 public class PostController {
 
     private final PostService postService;
+    private final MemberService memberService;
 
-    public PostController(PostService postService) {
+    public PostController(PostService postService, MemberService memberService) {
         this.postService = postService;
+        this.memberService = memberService;
     }
 
-    // ★ 반환 타입 Map<String, Object> → PostListResponse
     @GetMapping
     public PostListResponse getPosts(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        page = Math.max(page, 1);                       // ★ 추가
-        size = Math.min(Math.max(size, 1), 100);        // ★ 추가
-
+        page = Math.max(page, 1);
+        size = Math.min(Math.max(size, 1), 100);
         int offset = (page - 1) * size;
+
         List<PostResponse> posts = postService.getPosts(keyword, size, offset);
         int totalPages = postService.getTotalPages(keyword, size);
 
-        return new PostListResponse(posts, totalPages, page);   // ★ Map 만들던 부분 교체
+        return new PostListResponse(posts, totalPages, page);
     }
 
-    // ★ 반환 PostResponse, 서비스 메서드 이름 변경
     @GetMapping("/{id}")
     public PostResponse getPostById(@PathVariable Long id) {
         return postService.getPostAndIncreaseViews(id);
     }
 
-    // ★ @Valid, DTO 변경, 201 응답
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createPost(@Valid @RequestBody PostCreateRequest request) {
-        postService.createPost(request);
+    public void createPost(@Valid @RequestBody PostCreateRequest request,
+                           HttpServletRequest httpRequest) {
+        Member member = memberService.getMember(AuthSupport.requireLoginId(httpRequest));
+        postService.createPost(member, request);
     }
 
-    // ★ @Valid, DTO 변경, 반환 PostResponse
     @PutMapping("/{id}")
     public PostResponse updatePost(@PathVariable Long id,
-                                   @Valid @RequestBody PostUpdateRequest request) {
-        return postService.updatePost(id, request);
+                                   @Valid @RequestBody PostUpdateRequest request,
+                                   HttpServletRequest httpRequest) {
+        Long loginMemberId = AuthSupport.requireLoginId(httpRequest);
+        return postService.updatePost(id, loginMemberId, request);
     }
 
-    // ★ 204 응답
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deletePost(@PathVariable Long id) {
-        postService.deletePost(id);
+    public void deletePost(@PathVariable Long id, HttpServletRequest httpRequest) {
+        Long loginMemberId = AuthSupport.requireLoginId(httpRequest);
+        postService.deletePost(id, loginMemberId);
     }
 }

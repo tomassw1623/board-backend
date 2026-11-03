@@ -35,3 +35,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 테스트용 쿠키 파일 (로그인 세션이 들어 있음) ###
+a.txt
+b.txt
+cookie.txt
+*.cookie

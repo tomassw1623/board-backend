@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Setter
 public class Post {
     private Long id;
+    private Long memberId;
     private String title;
     private String content;
     private String author;

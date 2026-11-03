@@ -1,15 +1,18 @@
 package com.example.board_backand.service;
 
+import com.example.board_backand.dto.Member;
 import com.example.board_backand.dto.Post;
 import com.example.board_backand.dto.request.PostCreateRequest;
 import com.example.board_backand.dto.request.PostUpdateRequest;
 import com.example.board_backand.dto.response.PostResponse;
+import com.example.board_backand.exception.ForbiddenException;
 import com.example.board_backand.exception.NotFoundException;
 import com.example.board_backand.mapper.PostMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class PostService {
@@ -33,7 +36,7 @@ public class PostService {
         }
         return (int) Math.ceil((double) totalCount / size);
     }
-    
+
     @Transactional
     public PostResponse getPostAndIncreaseViews(Long id) {
         if (postMapper.increaseViews(id) == 0) {
@@ -42,30 +45,43 @@ public class PostService {
         return PostResponse.from(postMapper.findById(id));
     }
 
-    public void createPost(PostCreateRequest request) {
+    // ★ 작성자는 요청이 아니라 로그인한 회원으로 정한다
+    public void createPost(Member member, PostCreateRequest request) {
         Post post = new Post();
+        post.setMemberId(member.getId());
+        post.setAuthor(member.getNickname());
         post.setTitle(request.title().trim());
         post.setContent(request.content());
-        post.setAuthor(request.author().trim());
         postMapper.insertPost(post);
     }
 
     @Transactional
-    public PostResponse updatePost(Long id, PostUpdateRequest request) {
+    public PostResponse updatePost(Long id, Long loginMemberId, PostUpdateRequest request) {
+        findOwnedPost(id, loginMemberId);   // ★ 없으면 404, 남의 글이면 403
+
         Post post = new Post();
         post.setId(id);
         post.setTitle(request.title().trim());
         post.setContent(request.content());
+        postMapper.updatePost(post);
 
-        if (postMapper.updatePost(post) == 0) {
-            throw new NotFoundException("게시글을 찾을 수 없습니다. id=" + id);
-        }
         return PostResponse.from(postMapper.findById(id));
     }
 
-    public void deletePost(Long id) {
-        if (postMapper.deletePost(id) == 0) {
+    public void deletePost(Long id, Long loginMemberId) {
+        findOwnedPost(id, loginMemberId);   // ★ 없으면 404, 남의 글이면 403
+        postMapper.deletePost(id);
+    }
+
+    // 글을 찾고, 로그인한 회원이 작성자인지 확인한다
+    private Post findOwnedPost(Long id, Long loginMemberId) {
+        Post post = postMapper.findById(id);
+        if (post == null) {
             throw new NotFoundException("게시글을 찾을 수 없습니다. id=" + id);
         }
+        if (!Objects.equals(post.getMemberId(), loginMemberId)) {
+            throw new ForbiddenException("본인이 작성한 글만 수정/삭제할 수 있습니다.");
+        }
+        return post;
     }
 }
