@@ -11,6 +11,7 @@ public interface PostMapper {
     int countPosts(@Param("keyword") String keyword);
     Post findById(Long id);
     void insertPost(Post post);
-    void updatePost(Post post);
-    void deletePost(Long id);
+    int updatePost(Post post);
+    int deletePost(Long id);
+    int increaseViews(Long id);
 }

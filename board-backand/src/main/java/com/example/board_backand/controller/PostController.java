@@ -1,13 +1,16 @@
 package com.example.board_backand.controller;
 
-import com.example.board_backand.dto.Post;
+import com.example.board_backand.dto.request.PostCreateRequest;       // ★
+import com.example.board_backand.dto.request.PostUpdateRequest;       // ★
+import com.example.board_backand.dto.response.PostListResponse;       // ★
+import com.example.board_backand.dto.response.PostResponse;           // ★
 import com.example.board_backand.service.PostService;
+import jakarta.validation.Valid;                                      // ★
+import org.springframework.http.HttpStatus;                           // ★
 import org.springframework.web.bind.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+// ★ java.util.HashMap, java.util.Map import 는 삭제
 
 @RestController
 @RequestMapping("/api/posts")
@@ -20,41 +23,47 @@ public class PostController {
         this.postService = postService;
     }
 
+    // ★ 반환 타입 Map<String, Object> → PostListResponse
     @GetMapping
-    public Map<String, Object> getPosts(
+    public PostListResponse getPosts(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
+
+        page = Math.max(page, 1);                       // ★ 추가
+        size = Math.min(Math.max(size, 1), 100);        // ★ 추가
+
         int offset = (page - 1) * size;
-        List<Post> posts = postService.getPosts(keyword, size, offset);
+        List<PostResponse> posts = postService.getPosts(keyword, size, offset);
         int totalPages = postService.getTotalPages(keyword, size);
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("posts", posts);
-        response.put("totalPages", totalPages);
-        response.put("currentPage", page);
-
-        return response;
+        return new PostListResponse(posts, totalPages, page);   // ★ Map 만들던 부분 교체
     }
 
+    // ★ 반환 PostResponse, 서비스 메서드 이름 변경
     @GetMapping("/{id}")
-    public Post getPostById(@PathVariable Long id) {
-        return postService.getPostById(id);
+    public PostResponse getPostById(@PathVariable Long id) {
+        return postService.getPostAndIncreaseViews(id);
     }
 
+    // ★ @Valid, DTO 변경, 201 응답
     @PostMapping
-    public void createPost(@RequestBody Post post) {
-        postService.createPost(post);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createPost(@Valid @RequestBody PostCreateRequest request) {
+        postService.createPost(request);
     }
 
+    // ★ @Valid, DTO 변경, 반환 PostResponse
     @PutMapping("/{id}")
-    public void updatePost(@PathVariable Long id, @RequestBody Post post) {
-    postService.updatePost(id, post);
+    public PostResponse updatePost(@PathVariable Long id,
+                                   @Valid @RequestBody PostUpdateRequest request) {
+        return postService.updatePost(id, request);
     }
 
+    // ★ 204 응답
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePost(@PathVariable Long id) {
-    postService.deletePost(id);
+        postService.deletePost(id);
     }
 }

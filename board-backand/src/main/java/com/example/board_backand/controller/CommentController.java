@@ -1,19 +1,24 @@
 package com.example.board_backand.controller;
 
 import com.example.board_backand.dto.Comment;
+import com.example.board_backand.dto.request.CommentCreateRequest;
 import com.example.board_backand.service.CommentService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class CommentController {
 
-    @Autowired
-    private CommentService commentService;
+    private final CommentService commentService;
+
+    public CommentController(CommentService commentService) {
+        this.commentService = commentService;
+    }
 
     @GetMapping("/posts/{postId}/comments")
     public List<Comment> getComments(@PathVariable Long postId) {
@@ -21,12 +26,14 @@ public class CommentController {
     }
 
     @PostMapping("/posts/{postId}/comments")
-    public void addComment(@PathVariable Long postId, @RequestBody Comment comment) {
-        comment.setPostId(postId);
-        commentService.addComment(comment);
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addComment(@PathVariable Long postId,
+                           @Valid @RequestBody CommentCreateRequest request) {
+        commentService.addComment(postId, request);
     }
 
     @DeleteMapping("/comments/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable Long id) {
         commentService.deleteComment(id);
     }
