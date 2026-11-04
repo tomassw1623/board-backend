@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board_backend.mapper.CommentMapper">
+
+    <select id="findByPostId" resultType="com.example.board_backend.dto.Comment">
+        SELECT id, post_id AS postId, member_id AS memberId, content, author, created_at AS createdAt
+        FROM comments
+        WHERE post_id = #{postId}
+        ORDER BY id DESC
+    </select>
+
+    <!-- ★ 추가: 삭제 전 작성자 확인용 -->
+    <select id="findById" resultType="com.example.board_backend.dto.Comment">
+        SELECT id, post_id AS postId, member_id AS memberId, content, author, created_at AS createdAt
+        FROM comments
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.board_backend.dto.Comment">
+        INSERT INTO comments (post_id, member_id, content, author)
+        VALUES (#{postId}, #{memberId}, #{content}, #{author})
+    </insert>
+
+    <delete id="delete" parameterType="Long">
+        DELETE FROM comments WHERE id = #{id}
+    </delete>
+
+</mapper>

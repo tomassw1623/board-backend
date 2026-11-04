@@ -1,0 +1,17 @@
+package com.example.board_backend.mapper;
+
+import com.example.board_backend.dto.Post;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import java.util.List;
+
+@Mapper
+public interface PostMapper {
+    List<Post> findAll(@Param("keyword") String keyword, @Param("size") int size, @Param("offset") int offset);
+    int countPosts(@Param("keyword") String keyword);
+    Post findById(Long id);
+    void insertPost(Post post);
+    int updatePost(Post post);
+    int deletePost(Long id);
+    int increaseViews(Long id);
+}
